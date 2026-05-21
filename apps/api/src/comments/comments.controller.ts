@@ -20,7 +20,6 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
-  // POST /tickets/:ticketId/comments — ajout d'un commentaire (admin + technicien)
   @Post()
   create(
     @Param('ticketId', ParseUUIDPipe) ticketId: string,
@@ -30,13 +29,9 @@ export class CommentsController {
     return this.commentsService.create(ticketId, dto, user.id);
   }
 
-  // DELETE /tickets/:ticketId/comments/:id — suppression (auteur ou admin)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(
-    @Param('id', ParseUUIDPipe) id: string,
-    @CurrentUser() user: { id: string; role: Role },
-  ) {
+  remove(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: { id: string; role: Role }) {
     return this.commentsService.remove(id, user);
   }
 }

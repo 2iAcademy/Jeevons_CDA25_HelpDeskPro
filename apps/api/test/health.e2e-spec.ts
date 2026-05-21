@@ -21,8 +21,9 @@ describe('Health (e2e)', () => {
     await app.close();
   });
 
-  it('/health (GET) retourne 200', async () => {
+  it('/health (GET) répond', async () => {
     const res = await request(app.getHttpServer()).get('/health');
-    expect([200, 503]).toContain(res.status);
+    // 200 si la base est joignable, 503 sinon — les deux sont acceptables en CI
+    expect(res.status === 200 || res.status === 503).toBe(true);
   });
 });

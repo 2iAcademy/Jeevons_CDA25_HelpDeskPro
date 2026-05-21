@@ -1,5 +1,5 @@
 export function omitPassword<T extends { password: string }>(user: T): Omit<T, 'password'> {
-  const { password: _password, ...safeUser } = user;
-  void _password;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- exclusion volontaire du hash
+  const { password, ...safeUser } = user;
   return safeUser;
 }

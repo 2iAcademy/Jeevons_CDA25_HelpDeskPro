@@ -11,12 +11,14 @@ Prototype de gestion de tickets de support informatique, développé dans le cad
 3. [Architecture](#architecture)
 4. [Modèle de données](#modèle-de-données)
 5. [Règles métier](#règles-métier)
-6. [Lancer le projet](#lancer-le-projet)
-7. [Comptes de démonstration](#comptes-de-démonstration)
-8. [Structure du projet](#structure-du-projet)
-9. [Planning prévisionnel & bilan](#planning-prévisionnel--bilan)
-10. [Note sur le style et les interfaces](#note-sur-le-style-et-les-interfaces)
-11. [Wireframes](#wireframes)
+6. [Guide de navigation — fonctionnalités ECF](#guide-de-navigation--fonctionnalités-ecf)
+7. [Tests unitaires](#tests-unitaires)
+8. [Lancer le projet](#lancer-le-projet)
+9. [Comptes de démonstration](#comptes-de-démonstration)
+10. [Structure du projet](#structure-du-projet)
+11. [Planning prévisionnel & bilan](#planning-prévisionnel--bilan)
+12. [Note sur le style et les interfaces](#note-sur-le-style-et-les-interfaces)
+13. [Wireframes](#wireframes)
 
 ---
 
@@ -105,6 +107,50 @@ Trois entités principales, reliées entre elles :
 | R5  | Un technicien ne peut modifier que les tickets qui lui sont affectés | Vérification `assignedToId === currentUser.id` dans `updateStatus()` |
 | R6  | Ticket "en retard" = OPEN ou IN_PROGRESS depuis plus de 48h          | `DashboardService.getStats()`, badge dans la liste et le détail      |
 | R7  | Les mots de passe sont hachés avec bcrypt (12 rounds)                | `AuthService.validateUser()`, `UsersService.create()`                |
+
+---
+
+## Guide de navigation — fonctionnalités ECF
+
+Ce tableau liste les fonctionnalités attendues dans le sujet ECF et indique exactement où elles sont implémentées dans le code, côté API et côté frontend.
+
+| Fonctionnalité                              | Fichiers API (NestJS)                                                                         | Fichiers Frontend (Next.js)                                                                                               |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **Authentification** (login, JWT, session)  | `apps/api/src/auth/auth.service.ts` `apps/api/src/auth/auth.controller.ts` `apps/api/src/auth/jwt.strategy.ts` | `apps/web/src/app/login/page.tsx` `apps/web/src/lib/auth.ts` `apps/web/src/app/api/auth/[...nextauth]/route.ts`           |
+| **Protection des routes** (guards)          | `apps/api/src/auth/jwt-auth.guard.ts` `apps/api/src/auth/roles.guard.ts`                      | `apps/web/src/app/(app)/layout.tsx` `apps/web/src/proxy.ts`                                                               |
+| **CRUD tickets** (créer, lire, modifier, supprimer) | `apps/api/src/tickets/tickets.service.ts` `apps/api/src/tickets/tickets.controller.ts` `apps/api/src/tickets/dto/` | `apps/web/src/app/(app)/tickets/page.tsx` `apps/web/src/app/(app)/tickets/[id]/page.tsx` `apps/web/src/components/organisms/TicketsClient.tsx` `apps/web/src/components/organisms/TicketDetailClient.tsx` |
+| **Règles métier sur les statuts** (R2, R3, R4, R5) | `apps/api/src/tickets/tickets.service.ts` (méthodes `create`, `updateStatus`, `assign`) | `apps/web/src/components/organisms/TicketDetailClient.tsx` (options désactivées selon état) |
+| **Affectation d'un technicien**             | `apps/api/src/tickets/tickets.service.ts` (méthode `assign`) `apps/api/src/users/users.service.ts` (méthode `findTechnicians`) | `apps/web/src/components/organisms/TicketDetailClient.tsx` (panneau latéral)              |
+| **Commentaires**                            | `apps/api/src/comments/comments.service.ts` `apps/api/src/comments/comments.controller.ts`   | `apps/web/src/components/organisms/TicketDetailClient.tsx` (section timeline)                                             |
+| **Dashboard admin** (KPIs, graphiques, retards) | `apps/api/src/dashboard/dashboard.service.ts` `apps/api/src/dashboard/dashboard.controller.ts` | `apps/web/src/app/(app)/dashboard/page.tsx` `apps/web/src/components/organisms/DashboardClient.tsx`                       |
+| **Gestion des rôles** (ADMIN / TECHNICIEN) | `apps/api/src/auth/roles.decorator.ts` `apps/api/src/auth/roles.guard.ts`                    | `apps/web/src/app/(app)/dashboard/page.tsx` (redirect si non-admin)                                                       |
+| **Schéma base de données**                  | `apps/api/prisma/schema.prisma`                                                               | —                                                                                                                         |
+| **Données de démonstration** (seed)         | `apps/api/src/database/seed.ts`                                                               | —                                                                                                                         |
+
+---
+
+## Tests unitaires
+
+Les tests couvrent les règles métier critiques du service tickets. Pas besoin de base de données : `PrismaService` est remplacé par un mock Jest, ce qui permet de lancer les tests en isolation complète.
+
+**Fichier :** `apps/api/src/tickets/tickets.service.spec.ts`
+
+| Test                   | Ce qu'il vérifie                                                             |
+| ---------------------- | ---------------------------------------------------------------------------- |
+| R2 — statut à la création | `TicketsService.create()` force toujours `status: OPEN`, quoi qu'on passe en paramètre |
+| R3 — IN_PROGRESS sans technicien | `updateStatus()` lève une `BadRequestException` si aucun technicien n'est affecté |
+| R4 — ticket CLOSED immuable | `updateStatus()` lève une `ForbiddenException` si le ticket est déjà fermé |
+
+**Lancer les tests :**
+
+```bash
+cd apps/api
+npm test
+```
+
+Résultat attendu : **3 tests passés, 0 échec**.
+
+Les tests sont également exécutés automatiquement par la CI GitHub Actions à chaque push ou pull request vers la branche `DEV` (voir `.github/workflows/ci.yml`).
 
 ---
 
@@ -207,7 +253,7 @@ Jeevons_CDA25_HelpDeskPro/
 │           └── types/                  # Types TypeScript partagés front/back
 │
 ├── docs/
-│   └── assets/                       # Schéma BDD, wireframes (README)
+│   └── assets/                       # Schéma BDD, wireframes, planning (README)
 ├── docker-compose.yml
 ├── .env.example
 └── README.md
@@ -250,6 +296,12 @@ Jeevons_CDA25_HelpDeskPro/
 | Page dashboard                   | 5 min        | -40 min  | Uniquement du câblage de données, pas de logique métier. Style généré.                                                                                 |
 | README                           | 30 min       | =        | —                                                                                                                                                      |
 | **Total réel**                   | **~6 h**     | **-3 h** | Gain principalement sur le front grâce à la génération d'interfaces par IA (voir section dédiée ci-dessous).                                           |
+
+### Planning visuel
+
+Comparaison estimé / réel par tâche (bleu = prévisionnel, vert = dans les temps, rouge = dépassement) :
+
+![Planning visuel — estimé vs réel](docs/assets/planning-visuel.png)
 
 ### Points techniques rencontrés
 

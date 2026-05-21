@@ -1,8 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Role } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -11,15 +7,8 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 export class CommentsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(
-    ticketId: string,
-    dto: CreateCommentDto,
-    authorId: string,
-  ) {
-    // Vérification que le ticket existe
-    const ticket = await this.prisma.ticket.findUnique({
-      where: { id: ticketId },
-    });
+  async create(ticketId: string, dto: CreateCommentDto, authorId: string) {
+    const ticket = await this.prisma.ticket.findUnique({ where: { id: ticketId } });
     if (!ticket) throw new NotFoundException(`Ticket ${ticketId} introuvable`);
 
     return this.prisma.comment.create({
@@ -37,23 +26,14 @@ export class CommentsService {
     });
   }
 
-  async remove(
-    id: string,
-    currentUser: { id: string; role: Role },
-  ) {
+  async remove(id: string, currentUser: { id: string; role: Role }) {
     const comment = await this.prisma.comment.findUnique({
       where: { id },
     });
     if (!comment) throw new NotFoundException(`Commentaire ${id} introuvable`);
 
-    // Seul l'auteur ou un admin peut supprimer un commentaire
-    if (
-      currentUser.role !== Role.ADMIN &&
-      comment.authorId !== currentUser.id
-    ) {
-      throw new ForbiddenException(
-        'Vous ne pouvez supprimer que vos propres commentaires',
-      );
+    if (currentUser.role !== Role.ADMIN && comment.authorId !== currentUser.id) {
+      throw new ForbiddenException('Vous ne pouvez supprimer que vos propres commentaires');
     }
 
     await this.prisma.comment.delete({ where: { id } });

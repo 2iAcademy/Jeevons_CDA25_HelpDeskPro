@@ -4,13 +4,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { TicketStatus, Role } from '@prisma/client';
+import { TicketStatus, Role, Priority } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
 import { AssignTicketDto } from './dto/assign-ticket.dto';
 
-// Sélection commune pour éviter d'exposer des champs sensibles
+// champs retournés sur tous les appels — on n'expose pas les id internes inutiles
 const ticketSelect = {
   id: true,
   title: true,
@@ -30,15 +30,11 @@ const ticketSelect = {
 export class TicketsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(filters: {
-    status?: TicketStatus;
-    priority?: string;
-    assignedToId?: string;
-  }) {
+  async findAll(filters: { status?: TicketStatus; priority?: Priority; assignedToId?: string }) {
     return this.prisma.ticket.findMany({
       where: {
         ...(filters.status && { status: filters.status }),
-        ...(filters.priority && { priority: filters.priority as any }),
+        ...(filters.priority && { priority: filters.priority }),
         ...(filters.assignedToId && { assignedToId: filters.assignedToId }),
       },
       select: ticketSelect,
@@ -68,7 +64,7 @@ export class TicketsService {
   }
 
   async create(dto: CreateTicketDto, createdById: string) {
-    // Règle 2 : à la création, statut Ouvert et aucun technicien affecté
+    // statut forcé à OPEN à la création, peu importe ce qui est passé
     return this.prisma.ticket.create({
       data: {
         ...dto,
@@ -79,27 +75,20 @@ export class TicketsService {
     });
   }
 
-  async updateStatus(
-    id: string,
-    dto: UpdateStatusDto,
-    currentUser: { id: string; role: Role },
-  ) {
+  async updateStatus(id: string, dto: UpdateStatusDto, currentUser: { id: string; role: Role }) {
     const ticket = await this.prisma.ticket.findUnique({ where: { id } });
     if (!ticket) throw new NotFoundException(`Ticket ${id} introuvable`);
 
-    // Règle 4 : un ticket fermé ne peut plus être modifié
     if (ticket.status === TicketStatus.CLOSED) {
       throw new ForbiddenException('Un ticket fermé ne peut plus être modifié');
     }
 
-    // Règle 3 : passage en "En cours" impossible sans technicien affecté
     if (dto.status === TicketStatus.IN_PROGRESS && !ticket.assignedToId) {
       throw new BadRequestException(
         'Le ticket doit être affecté à un technicien avant de passer en cours',
       );
     }
 
-    // Un technicien ne peut modifier que ses propres tickets
     if (currentUser.role === Role.TECHNICIAN && ticket.assignedToId !== currentUser.id) {
       throw new ForbiddenException('Vous ne pouvez modifier que vos propres tickets');
     }
@@ -115,7 +104,6 @@ export class TicketsService {
     const ticket = await this.prisma.ticket.findUnique({ where: { id } });
     if (!ticket) throw new NotFoundException(`Ticket ${id} introuvable`);
 
-    // Règle 4 : ticket fermé non modifiable
     if (ticket.status === TicketStatus.CLOSED) {
       throw new ForbiddenException('Un ticket fermé ne peut plus être modifié');
     }
@@ -134,7 +122,6 @@ export class TicketsService {
     await this.prisma.ticket.delete({ where: { id } });
   }
 
-  // Calcul des tickets en retard (règle 6 : Ouvert ou En cours depuis > 48h)
   async getDashboardStats() {
     const tickets = await this.prisma.ticket.findMany({
       select: { ...ticketSelect },
@@ -144,8 +131,7 @@ export class TicketsService {
     const LIMIT_MS = 48 * 60 * 60 * 1000;
 
     const lateTickets = tickets.filter((t) => {
-      const isActive =
-        t.status === TicketStatus.OPEN || t.status === TicketStatus.IN_PROGRESS;
+      const isActive = t.status === TicketStatus.OPEN || t.status === TicketStatus.IN_PROGRESS;
       const age = now.getTime() - new Date(t.createdAt).getTime();
       return isActive && age > LIMIT_MS;
     });

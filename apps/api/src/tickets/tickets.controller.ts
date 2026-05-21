@@ -27,7 +27,6 @@ import { AssignTicketDto } from './dto/assign-ticket.dto';
 export class TicketsController {
   constructor(private readonly ticketsService: TicketsService) {}
 
-  // GET /tickets — liste avec filtres optionnels (admin + technicien)
   @Get()
   findAll(
     @Query('status') status?: TicketStatus,
@@ -37,30 +36,24 @@ export class TicketsController {
     return this.ticketsService.findAll({ status, priority, assignedToId });
   }
 
-  // GET /tickets/stats — tableau de bord (admin uniquement)
+  // stats avant :id sinon NestJS confond les deux routes
   @Get('stats')
   @Roles(Role.ADMIN)
   getDashboardStats() {
     return this.ticketsService.getDashboardStats();
   }
 
-  // GET /tickets/:id — détail d'un ticket avec commentaires
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.ticketsService.findOne(id);
   }
 
-  // POST /tickets — création (admin uniquement, règle 2)
   @Post()
   @Roles(Role.ADMIN)
-  create(
-    @Body() dto: CreateTicketDto,
-    @CurrentUser() user: { id: string; role: Role },
-  ) {
+  create(@Body() dto: CreateTicketDto, @CurrentUser() user: { id: string; role: Role }) {
     return this.ticketsService.create(dto, user.id);
   }
 
-  // PATCH /tickets/:id/status — changement de statut (règles 3, 4)
   @Patch(':id/status')
   updateStatus(
     @Param('id', ParseUUIDPipe) id: string,
@@ -70,17 +63,12 @@ export class TicketsController {
     return this.ticketsService.updateStatus(id, dto, user);
   }
 
-  // PATCH /tickets/:id/assign — affectation technicien (admin uniquement)
   @Patch(':id/assign')
   @Roles(Role.ADMIN)
-  assign(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: AssignTicketDto,
-  ) {
+  assign(@Param('id', ParseUUIDPipe) id: string, @Body() dto: AssignTicketDto) {
     return this.ticketsService.assign(id, dto);
   }
 
-  // DELETE /tickets/:id — suppression (admin uniquement)
   @Delete(':id')
   @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.NO_CONTENT)
