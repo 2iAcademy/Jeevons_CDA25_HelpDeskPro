@@ -16,6 +16,7 @@ Prototype de gestion de tickets de support informatique, développé dans le cad
 8. [Structure du projet](#structure-du-projet)
 9. [Planning prévisionnel & bilan](#planning-prévisionnel--bilan)
 10. [Note sur le style et les interfaces](#note-sur-le-style-et-les-interfaces)
+11. [Wireframes](#wireframes)
 
 ---
 
@@ -205,6 +206,8 @@ Jeevons_CDA25_HelpDeskPro/
 │           │   └── api.ts              # Client HTTP avec injection automatique du JWT
 │           └── types/                  # Types TypeScript partagés front/back
 │
+├── docs/
+│   └── assets/                       # Schéma BDD, wireframes (README)
 ├── docker-compose.yml
 ├── .env.example
 └── README.md
@@ -273,11 +276,18 @@ Le prompt que j'ai utilisé pour la génération des interfaces :
 ```
 Voici dans ces fichiers tous le styles, les règles, classes, et design patterns d'une de
 mes applications. Je veux que tu t'en serve et les respecte scrupuleusement pour réaliser
-l'interface du projet actuel dans lequel tu te trouve. Ceci implique que tu relise
-correctement à chaque le backend que j'ai fais pour éviter des écarts dans les
+l'interface du projet actuel dans lequel tu te trouve. Sert toi aussi du wirefrime que j'ai fais en pièces jointes. Ceci implique que tu comprenne correctement le backend que j'ai fais pour éviter des écarts dans les
 implémentations. Soit précis, colle toi bien à ce que je te donne. Prends bien
 connaissance du projet, n'hésite pas à me poser des questions. Fais au plus simple
 possible (K.I.S.S; single responsibility; Atomic Design). Ne réinvente pas la roue, ne
 cherche pas à modifier mon backend. Si tu remarques une erreur d'implémentation fais m'en
 part et je m'en chargerai.
 ```
+
+---
+
+## Wireframes
+
+Maquettes basse fidélité des deux écrans principaux de l'application (dashboard administrateur et liste des tickets), réalisées en amont du développement pour cadrer la navigation et la disposition des blocs.
+
+![Wireframes — Dashboard et liste des tickets](docs/assets/wireframes.png)
