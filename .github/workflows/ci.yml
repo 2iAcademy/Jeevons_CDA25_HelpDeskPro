@@ -17,6 +17,8 @@ jobs:
     defaults:
       run:
         working-directory: apps/${{ matrix.app }}
+    env:
+      DATABASE_URL: ${{ matrix.app == 'api' && 'postgresql://ci:ci@localhost:5432/ci' || '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -25,6 +27,9 @@ jobs:
           cache: npm
           cache-dependency-path: apps/${{ matrix.app }}/package-lock.json
       - run: npm ci
+      - name: Generate Prisma client
+        if: matrix.app == 'api'
+        run: npx prisma generate
       - run: npm run lint
       - run: npm test --if-present
       - run: npm run build
