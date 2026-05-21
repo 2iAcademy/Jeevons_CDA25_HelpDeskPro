@@ -1,5 +1,16 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import type { Role } from "@/types";
+
+type LoginApiResponse = {
+  access_token: string;
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    role: Role;
+  };
+};
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -13,21 +24,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (!credentials?.email || !credentials?.password) return null;
 
         try {
-          const res = await fetch(
-            `${process.env.API_URL}/auth/login`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                email: credentials.email,
-                password: credentials.password,
-              }),
-            }
-          );
+          const res = await fetch(`${process.env.API_URL}/auth/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: credentials.email,
+              password: credentials.password,
+            }),
+          });
 
           if (!res.ok) return null;
 
-          const data = await res.json();
+          const data = (await res.json()) as LoginApiResponse;
 
           return {
             id: data.user.id,
@@ -46,15 +54,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.role = (user as any).role;
-        token.accessToken = (user as any).accessToken;
+        token.role = user.role;
+        token.accessToken = user.accessToken;
       }
       return token;
     },
     session({ session, token }) {
-      session.user.id = token.id as string;
-      (session.user as any).role = token.role;
-      (session.user as any).accessToken = token.accessToken;
+      if (token.id) session.user.id = token.id;
+      if (token.role) session.user.role = token.role;
+      if (token.accessToken) session.user.accessToken = token.accessToken;
       return session;
     },
   },
