@@ -1,7 +1,27 @@
-import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+import { NextResponse } from "next/server";
 
-// Protection des routes : vérifie la présence du cookie de session next-auth
-export function proxy(request: NextRequest) {
+const SESSION_COOKIES = [
+  "authjs.session-token",
+  "__Secure-authjs.session-token",
+  "next-auth.session-token",
+  "__Secure-next-auth.session-token",
+] as const;
+
+function hasSessionCookie(request: {
+  cookies: { get: (name: string) => { value?: string } | undefined };
+}): boolean {
+  return SESSION_COOKIES.some((name) => request.cookies.get(name)?.value);
+}
+
+function clearSessionCookies(response: NextResponse): NextResponse {
+  for (const name of SESSION_COOKIES) {
+    response.cookies.delete(name);
+  }
+  return response;
+}
+
+export const proxy = auth((request) => {
   const { pathname } = request.nextUrl;
 
   const isLoginPage = pathname === "/login";
@@ -12,23 +32,26 @@ export function proxy(request: NextRequest) {
 
   if (isPublic) return NextResponse.next();
 
-  const sessionToken =
-    request.cookies.get("next-auth.session-token")?.value ||
-    request.cookies.get("__Secure-next-auth.session-token")?.value ||
-    request.cookies.get("authjs.session-token")?.value;
-
-  const isLoggedIn = !!sessionToken;
+  const isLoggedIn = !!request.auth;
 
   if (!isLoggedIn && !isLoginPage) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    const response = NextResponse.redirect(new URL("/login", request.nextUrl));
+    if (hasSessionCookie(request)) {
+      clearSessionCookies(response);
+    }
+    return response;
   }
 
   if (isLoggedIn && isLoginPage) {
-    return NextResponse.redirect(new URL("/tickets", request.url));
+    return NextResponse.redirect(new URL("/tickets", request.nextUrl));
+  }
+
+  if (!isLoggedIn && isLoginPage && hasSessionCookie(request)) {
+    return clearSessionCookies(NextResponse.next());
   }
 
   return NextResponse.next();
-}
+});
 
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],

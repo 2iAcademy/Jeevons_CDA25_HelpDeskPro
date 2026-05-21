@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { auth } from "./auth";
 
 const API_URL = process.env.API_URL ?? "http://localhost:3000";
@@ -13,11 +14,15 @@ export async function apiFetch<T>(
   const session = await auth();
   const token = session?.user?.accessToken;
 
+  if (!token) {
+    redirect("/login");
+  }
+
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      Authorization: `Bearer ${token}`,
       ...options.headers,
     },
   });

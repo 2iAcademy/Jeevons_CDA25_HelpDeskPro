@@ -6,6 +6,7 @@ import Link from "next/link";
 import type { Ticket, TicketStatus, Priority, Role } from "@/types";
 import StatusBadge from "@/components/atoms/StatusBadge";
 import PriorityBadge from "@/components/atoms/PriorityBadge";
+import Select from "@/components/atoms/Select";
 
 // ── Helpers ──────────────────────────────────────────────────
 function shortDate(iso: string) {
@@ -131,18 +132,20 @@ function NewTicketModal({ onClose, onCreated }: NewTicketModalProps) {
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
             <div className="field">
-              <label htmlFor="nt-prio">Priorité *</label>
-              <select id="nt-prio" className="select" value={form.priority}
-                onChange={(e) => update("priority", e.target.value)}>
-                {PRIORITIES.map((p) => <option key={p} value={p}>{PRIORITY_LABELS[p]}</option>)}
-              </select>
+              <label>Priorité *</label>
+              <Select
+                value={form.priority}
+                onChange={(v) => update("priority", v)}
+                options={PRIORITIES.map((p) => ({ value: p, label: PRIORITY_LABELS[p] }))}
+              />
             </div>
             <div className="field">
-              <label htmlFor="nt-cat">Catégorie *</label>
-              <select id="nt-cat" className="select" value={form.category}
-                onChange={(e) => update("category", e.target.value)}>
-                {CATEGORIES.map((c) => <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>)}
-              </select>
+              <label>Catégorie *</label>
+              <Select
+                value={form.category}
+                onChange={(v) => update("category", v)}
+                options={CATEGORIES.map((c) => ({ value: c, label: CATEGORY_LABELS[c] }))}
+              />
             </div>
           </div>
 
@@ -228,27 +231,42 @@ export default function TicketsClient({ tickets, technicians, role }: Props) {
 
         <div className="filter-pill">
           <span className="label-key">Statut</span>
-          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as TicketStatus | "all")}>
-            <option value="all">Tous</option>
-            {STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
-          </select>
+          <Select
+            variant="inline"
+            value={statusFilter}
+            onChange={(v) => setStatusFilter(v as TicketStatus | "all")}
+            options={[
+              { value: "all", label: "Tous" },
+              ...STATUSES.map((s) => ({ value: s, label: STATUS_LABELS[s] })),
+            ]}
+          />
         </div>
 
         <div className="filter-pill">
           <span className="label-key">Priorité</span>
-          <select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value as Priority | "all")}>
-            <option value="all">Toutes</option>
-            {PRIORITIES.map((p) => <option key={p} value={p}>{PRIORITY_LABELS[p]}</option>)}
-          </select>
+          <Select
+            variant="inline"
+            value={priorityFilter}
+            onChange={(v) => setPriorityFilter(v as Priority | "all")}
+            options={[
+              { value: "all", label: "Toutes" },
+              ...PRIORITIES.map((p) => ({ value: p, label: PRIORITY_LABELS[p] })),
+            ]}
+          />
         </div>
 
         <div className="filter-pill">
           <span className="label-key">Technicien</span>
-          <select value={assigneeFilter} onChange={(e) => setAssigneeFilter(e.target.value)}>
-            <option value="all">Tous</option>
-            <option value="none">Non assigné</option>
-            {technicians.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
-          </select>
+          <Select
+            variant="inline"
+            value={assigneeFilter}
+            onChange={setAssigneeFilter}
+            options={[
+              { value: "all", label: "Tous" },
+              { value: "none", label: "Non assigné" },
+              ...technicians.map((u) => ({ value: u.id, label: u.name })),
+            ]}
+          />
         </div>
 
         {hasActiveFilters && (

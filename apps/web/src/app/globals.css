@@ -180,6 +180,128 @@ input, textarea, select {
   box-shadow: 0 0 0 3px oklch(90% 0.06 25);
 }
 
+/* Custom dropdown (Select.tsx) */
+.ui-select {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+.ui-select__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  font-size: 13.5px;
+  color: var(--ink-1);
+  cursor: pointer;
+  text-align: left;
+  transition: border 0.12s, box-shadow 0.12s;
+}
+.ui-select__chevron {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  color: var(--ink-3);
+  transition: transform 0.15s ease;
+}
+.ui-select.is-open .ui-select__chevron {
+  transform: rotate(180deg);
+}
+.ui-select.is-empty .ui-select__trigger {
+  color: var(--ink-3);
+}
+.ui-select.is-open .ui-select__trigger {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--accent) 18%, transparent);
+  outline: none;
+}
+.ui-select__value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  flex: 1;
+}
+.ui-select__menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  padding: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+.ui-select__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: var(--r-sm);
+  background: transparent;
+  font-size: 13px;
+  color: var(--ink-1);
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.ui-select__option:hover {
+  background: var(--surface-3);
+}
+.ui-select__option.is-selected {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+.ui-select__option.is-selected:hover {
+  background: var(--accent-soft);
+}
+
+/* Variante barre de filtres */
+.ui-select--inline {
+  position: static;
+  width: auto;
+  min-width: 0;
+  flex: 0 1 auto;
+}
+.ui-select--inline .ui-select__trigger {
+  width: auto;
+  min-width: 0;
+  padding: 0;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+.ui-select--inline .ui-select__value {
+  max-width: 110px;
+}
+.ui-select--inline .ui-select__chevron {
+  margin-left: 2px;
+}
+.ui-select--inline.is-open .ui-select__trigger {
+  border: none;
+  box-shadow: none;
+}
+.filter-pill .ui-select--inline .ui-select__menu {
+  top: calc(100% + 6px);
+  left: 0;
+  right: auto;
+  min-width: 100%;
+  width: max-content;
+}
+
 /* ============================================================
    Page login
    ============================================================ */
@@ -594,12 +716,14 @@ input, textarea, select {
   gap: 8px;
   margin-bottom: 18px;
   flex-wrap: wrap;
+  overflow: visible;
 }
 .search {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 12px;
+  height: 36px;
+  padding: 0 12px;
   border: 1px solid var(--border);
   border-radius: var(--r-sm);
   background: var(--surface);
@@ -609,26 +733,35 @@ input, textarea, select {
 }
 .search input { border: none; outline: none; background: transparent; font-size: 13px; width: 100%; }
 .filter-pill {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
+  gap: 10px;
+  height: 36px;
+  padding: 0 12px;
   border: 1px solid var(--border);
   border-radius: var(--r-sm);
   background: var(--surface);
   font-size: 12.5px;
   color: var(--ink-2);
+  flex-shrink: 0;
+  overflow: visible;
 }
-.filter-pill select {
-  border: none; outline: none; background: transparent;
-  font-size: 12.5px; padding: 0; appearance: none;
-  padding-right: 14px;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23667' stroke-width='2'><polyline points='6 9 12 15 18 9'/></svg>");
-  background-repeat: no-repeat;
-  background-position: right 0 center;
-  color: var(--ink-1); font-weight: 500;
+.filter-pill:has(.ui-select.is-open) {
+  z-index: 50;
 }
-.filter-pill .label-key { color: var(--ink-3); }
+.filter-pill .label-key {
+  color: var(--ink-3);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.filter-pill .ui-select--inline {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
 
 /* ============================================================
    Tickets table
