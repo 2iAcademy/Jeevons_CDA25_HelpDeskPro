@@ -6,12 +6,10 @@ import TicketsClient from "@/components/organisms/TicketsClient";
 export default async function TicketsPage() {
   const session = await auth();
 
-  const [tickets, users] = await Promise.all([
+  const [tickets, technicians] = await Promise.all([
     apiFetch<Ticket[]>("/tickets"),
-    apiFetch<User[]>("/users"),
+    apiFetch<User[]>("/users/technicians"),
   ]);
-
-  const technicians = users.filter((u) => u.role === "TECHNICIAN");
 
   return (
     <div className="main">

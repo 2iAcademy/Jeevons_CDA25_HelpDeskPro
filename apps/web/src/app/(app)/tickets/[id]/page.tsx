@@ -21,10 +21,7 @@ export default async function TicketDetailPage({
     notFound();
   }
 
-  const users = await apiFetch<User[]>("/users");
-  const technicians = users
-    .filter((u) => u.role === "TECHNICIAN")
-    .map((u) => ({ id: u.id, name: u.name }));
+  const technicians = await apiFetch<User[]>("/users/technicians");
 
   return (
     <div className="main">
