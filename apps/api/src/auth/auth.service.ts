@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
+import { omitPassword } from '../common/omit-password';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -17,8 +18,7 @@ export class AuthService {
     const match = await bcrypt.compare(password, user.password);
     if (!match) throw new UnauthorizedException('Identifiants invalides');
 
-    const { password: _, ...result } = user;
-    return result;
+    return omitPassword(user);
   }
 
   login(user: { id: string; email: string; role: string; name: string }) {
