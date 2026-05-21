@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-helpdesk}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-helpdesk}
+      POSTGRES_DB: ${DB_NAME:-helpdesk}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-helpdesk} -d ${DB_NAME:-helpdesk}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./apps/api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3000
+      DATABASE_URL: postgresql://${DB_USER:-helpdesk}:${DB_PASSWORD:-helpdesk}@postgres:5432/${DB_NAME:-helpdesk}
+      JWT_SECRET: ${JWT_SECRET:-changeme_en_prod}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3001}
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./apps/web
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      HOSTNAME: "0.0.0.0"
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3001}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-changeme_en_prod}
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./apps/web/src:/app/src
+      - ./apps/web/public:/app/public
+    depends_on:
+      - api
+
+volumes:
+  pgdata:

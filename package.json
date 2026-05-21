@@ -1,0 +1,35 @@
+{
+  "name": "fullstack-starter",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Fullstack starter: React + NestJS + Postgres",
+  "license": "MIT",
+  "scripts": {
+    "dev": "docker compose up -d --build",
+    "stop": "docker compose down",
+    "logs": "docker compose logs -f",
+    "api:dev": "npm --prefix apps/api run dev",
+    "api:test": "npm --prefix apps/api test",
+    "api:lint": "npm --prefix apps/api run lint",
+    "api:build": "npm --prefix apps/api run build",
+    "web:dev": "npm --prefix apps/web run dev",
+    "web:test": "npm --prefix apps/web test",
+    "web:lint": "npm --prefix apps/web run lint",
+    "web:build": "npm --prefix apps/web run build",
+    "lint": "npm run api:lint && npm run web:lint",
+    "test": "npm run api:test && npm run web:test",
+    "build": "npm run api:build && npm run web:build",
+    "install:all": "npm install && npm --prefix apps/api install && npm --prefix apps/web install",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.6.1",
+    "@commitlint/config-conventional": "^19.6.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.11"
+  },
+  "lint-staged": {
+    "apps/api/**/*.ts": ["npm --prefix apps/api run lint"],
+    "apps/web/**/*.{ts,tsx}": ["npm --prefix apps/web run lint:fix"]
+  }
+}
