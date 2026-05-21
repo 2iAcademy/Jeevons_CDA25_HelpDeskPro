@@ -24,7 +24,6 @@ export class DashboardService {
     const now = new Date();
     const LIMIT_MS = 48 * 60 * 60 * 1000;
 
-    // Répartition par statut
     const byStatus = tickets.reduce(
       (acc, t) => {
         acc[t.status] = (acc[t.status] || 0) + 1;
@@ -33,7 +32,6 @@ export class DashboardService {
       {} as Record<string, number>,
     );
 
-    // Répartition par priorité
     const byPriority = tickets.reduce(
       (acc, t) => {
         acc[t.priority] = (acc[t.priority] || 0) + 1;
@@ -42,7 +40,7 @@ export class DashboardService {
       {} as Record<string, number>,
     );
 
-    // Tickets en retard : OPEN ou IN_PROGRESS depuis plus de 48h (règle 6)
+    // tickets OPEN ou IN_PROGRESS ouverts depuis plus de 48h
     const lateTickets = tickets.filter((t) => {
       const isActive =
         t.status === TicketStatus.OPEN ||
@@ -51,7 +49,7 @@ export class DashboardService {
       return isActive && age > LIMIT_MS;
     });
 
-    // Tickets sans technicien affecté (hors résolu/fermé)
+    // tickets sans technicien, hors résolu/fermé
     const unassignedCount = tickets.filter(
       (t) =>
         t.assignedToId === null &&
@@ -59,7 +57,6 @@ export class DashboardService {
         t.status !== TicketStatus.CLOSED,
     ).length;
 
-    // 5 derniers tickets modifiés (activité récente)
     const recentActivity = [...tickets]
       .sort(
         (a, b) =>

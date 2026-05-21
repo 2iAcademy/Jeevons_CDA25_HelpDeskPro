@@ -16,10 +16,7 @@ export class CommentsService {
     dto: CreateCommentDto,
     authorId: string,
   ) {
-    // Vérification que le ticket existe
-    const ticket = await this.prisma.ticket.findUnique({
-      where: { id: ticketId },
-    });
+    const ticket = await this.prisma.ticket.findUnique({ where: { id: ticketId } });
     if (!ticket) throw new NotFoundException(`Ticket ${ticketId} introuvable`);
 
     return this.prisma.comment.create({
@@ -46,7 +43,6 @@ export class CommentsService {
     });
     if (!comment) throw new NotFoundException(`Commentaire ${id} introuvable`);
 
-    // Seul l'auteur ou un admin peut supprimer un commentaire
     if (
       currentUser.role !== Role.ADMIN &&
       comment.authorId !== currentUser.id

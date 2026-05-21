@@ -118,9 +118,8 @@ async function main() {
     prisma.comment.create({ data: { content: "Le compte de service apparaît verrouillé dans l'AD. Reset du mot de passe en cours, nouvelle tentative cette nuit.", ticketId: tk7.id, authorId: lea.id, createdAt: HOURS_AGO(5) }}),
   ]);
 
-  console.log('✅ Seed terminé avec succès.');
-  console.log(`   → 5 utilisateurs, 10 tickets, 8 commentaires créés.`);
-  console.log(`   → Mot de passe de démo : ${DEMO_PASSWORD}`);
+  console.log('Seed terminé : 5 utilisateurs, 10 tickets, 8 commentaires.');
+  console.log(`Mot de passe de démo : ${DEMO_PASSWORD}`);
 }
 
 main()
