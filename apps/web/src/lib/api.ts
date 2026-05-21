@@ -5,7 +5,7 @@ const API_URL = process.env.API_URL ?? "http://localhost:3000";
 
 /**
  * Client HTTP côté serveur (Server Components, Server Actions).
- * Injecte automatiquement le JWT de la session dans Authorization. (Code récupéré sur le repo officiel de NextAuth.js)
+ * Injecte automatiquement le JWT de la session dans Authorization. (J'ai récupéré ce code sur le repo officiel de NextAuth.js)
  */
 export async function apiFetch<T>(
   path: string,
