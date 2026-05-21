@@ -1,26 +1,344 @@
 @import "tailwindcss";
 
+/* ============================================================
+   Design tokens — HelpDesk Pro
+   ============================================================ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Surfaces */
+  --bg: oklch(98.5% 0.004 80);
+  --surface: #ffffff;
+  --surface-2: oklch(97% 0.005 80);
+  --surface-3: oklch(94.5% 0.006 80);
+  --border: oklch(91% 0.006 80);
+  --border-strong: oklch(85% 0.007 80);
+
+  /* Ink */
+  --ink-1: oklch(16% 0.012 260);
+  --ink-2: oklch(38% 0.012 260);
+  --ink-3: oklch(56% 0.010 260);
+  --ink-4: oklch(72% 0.008 260);
+
+  /* Accent indigo */
+  --accent: oklch(54% 0.15 258);
+  --accent-hover: oklch(48% 0.16 258);
+  --accent-soft: oklch(96% 0.025 258);
+  --accent-ink: oklch(36% 0.14 258);
+
+  /* Statuts */
+  --st-open:          oklch(60% 0.13 250);
+  --st-open-soft:     oklch(96% 0.025 250);
+  --st-progress:      oklch(62% 0.13 70);
+  --st-progress-soft: oklch(96% 0.030 80);
+  --st-waiting:       oklch(60% 0.10 300);
+  --st-waiting-soft:  oklch(96% 0.025 300);
+  --st-resolved:      oklch(58% 0.13 150);
+  --st-resolved-soft: oklch(96% 0.025 150);
+  --st-closed:        oklch(55% 0.01 260);
+  --st-closed-soft:   oklch(95% 0.004 260);
+
+  /* Priorités */
+  --pr-low:      oklch(58% 0.02 260);
+  --pr-medium:   oklch(60% 0.13 250);
+  --pr-high:     oklch(62% 0.15 50);
+  --pr-critical: oklch(58% 0.18 25);
+
+  /* Typographie */
+  --font-sans: "Geist", "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "Geist Mono", "JetBrains Mono", ui-monospace, monospace;
+
+  /* Rayon */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 20px;
+
+  /* Layout */
+  --sidebar-w: 248px;
+  --header-h: 64px;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-border: var(--border);
+  --color-ink-1: var(--ink-1);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-ink-4: var(--ink-4);
+  --color-accent: var(--accent);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ============================================================
+   Base
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  color: var(--ink-1);
+  background: var(--bg);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button { font-family: inherit; cursor: pointer; }
+input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ============================================================
+   Boutons
+   ============================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 13px;
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink-1);
+  transition: all 0.12s;
+  letter-spacing: -0.005em;
+}
+.btn:hover { background: var(--surface-3); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--ink-1);
+  border-color: var(--ink-1);
+  color: var(--bg);
+}
+.btn-primary:hover:not(:disabled) {
+  background: oklch(22% 0.012 260);
+  border-color: oklch(22% 0.012 260);
+}
+.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--ink-2);
+}
+.btn-ghost:hover { background: var(--surface-3); color: var(--ink-1); }
+.btn-danger { color: oklch(50% 0.18 25); }
+.btn-danger:hover { background: oklch(96% 0.03 25); color: oklch(45% 0.18 25); }
+.btn-sm { padding: 4px 9px; font-size: 12px; }
+
+/* ============================================================
+   Formulaires
+   ============================================================ */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-2);
+}
+.err {
+  font-size: 11.5px;
+  color: oklch(50% 0.18 25);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.input, .textarea, .select {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  font-size: 13.5px;
+  color: var(--ink-1);
+  transition: border 0.12s, box-shadow 0.12s;
+  outline: none;
+}
+.input:focus, .textarea:focus, .select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--accent) 18%, transparent);
+}
+.input.error, .textarea.error, .select.error {
+  border-color: oklch(60% 0.18 25);
+  box-shadow: 0 0 0 3px oklch(90% 0.06 25);
+}
+
+/* ============================================================
+   Page login
+   ============================================================ */
+.login-screen {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.login-aside {
+  background: var(--ink-1);
+  color: var(--bg);
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+.login-aside .l-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  position: relative;
+  z-index: 1;
+}
+.login-aside .l-brand .mark {
+  width: 30px; height: 30px;
+  background: var(--bg);
+  color: var(--ink-1);
+  border-radius: 8px;
+  display: grid; place-items: center;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+}
+.login-aside .hero {
+  margin-top: auto;
+  margin-bottom: 30px;
+  max-width: 420px;
+  position: relative;
+  z-index: 1;
+}
+.login-aside .eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: oklch(70% 0.008 80);
+  margin-bottom: 14px;
+  margin-top: 0;
+}
+.login-aside h1 {
+  font-size: 34px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin: 0 0 16px;
+}
+.login-aside .lead {
+  font-size: 15px;
+  line-height: 1.55;
+  color: oklch(78% 0.008 80);
+  margin: 0;
+}
+.login-aside .stats {
+  display: flex; gap: 28px;
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid oklch(28% 0.012 260);
+}
+.login-aside .stats .stat .n {
+  font-size: 22px; font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.login-aside .stats .stat .l {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: oklch(60% 0.008 80);
+  margin-top: 4px;
+}
+.grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(oklch(22% 0.012 260) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(22% 0.012 260) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at top right, black 0%, transparent 65%);
+  opacity: 0.6;
+  pointer-events: none;
+}
+.login-main {
+  display: grid;
+  place-items: center;
+  padding: 40px;
+}
+.login-card {
+  width: 100%;
+  max-width: 380px;
+}
+.login-card h2 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0 0 6px;
+}
+.login-card .sub {
+  color: var(--ink-3);
+  font-size: 14px;
+  margin-bottom: 28px;
+  margin-top: 0;
+}
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.test-accounts {
+  margin-top: 12px;
+  padding: 14px 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+}
+.test-accounts .h {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+  margin-bottom: 8px;
+}
+.test-accounts .acc {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--ink-2);
+  padding: 4px 0;
+  cursor: pointer;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  border-radius: 4px;
+}
+.test-accounts .acc:hover { color: var(--ink-1); }
+.role-pill {
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.role-pill.admin {
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+  border-color: color-mix(in oklch, var(--accent) 20%, transparent);
 }
