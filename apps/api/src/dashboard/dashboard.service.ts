@@ -42,9 +42,7 @@ export class DashboardService {
 
     // tickets OPEN ou IN_PROGRESS ouverts depuis plus de 48h
     const lateTickets = tickets.filter((t) => {
-      const isActive =
-        t.status === TicketStatus.OPEN ||
-        t.status === TicketStatus.IN_PROGRESS;
+      const isActive = t.status === TicketStatus.OPEN || t.status === TicketStatus.IN_PROGRESS;
       const age = now.getTime() - new Date(t.createdAt).getTime();
       return isActive && age > LIMIT_MS;
     });
@@ -58,10 +56,7 @@ export class DashboardService {
     ).length;
 
     const recentActivity = [...tickets]
-      .sort(
-        (a, b) =>
-          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-      )
+      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
       .slice(0, 5)
       .map((t) => ({
         id: t.id,

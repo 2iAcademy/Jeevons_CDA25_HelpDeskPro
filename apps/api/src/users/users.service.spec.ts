@@ -1,5 +1,6 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Role } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from './users.service';
 
 const mockPrisma = {
@@ -15,7 +16,7 @@ describe('UsersService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new UsersService(mockPrisma as any);
+    service = new UsersService(mockPrisma as unknown as PrismaService);
   });
 
   it("lève ConflictException si l'email existe déjà", async () => {

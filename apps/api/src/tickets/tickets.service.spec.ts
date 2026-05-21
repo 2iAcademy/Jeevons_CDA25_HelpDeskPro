@@ -1,5 +1,6 @@
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { TicketStatus, Priority, Category, Role } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
 import { TicketsService } from './tickets.service';
 
 // On crée un faux PrismaService pour ne pas toucher à la vraie base de données
@@ -33,7 +34,7 @@ describe('TicketsService — règles métier', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new TicketsService(mockPrisma as any);
+    service = new TicketsService(mockPrisma as unknown as PrismaService);
   });
 
   // ─────────────────────────────────────────────────────────────

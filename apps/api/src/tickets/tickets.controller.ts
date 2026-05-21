@@ -50,10 +50,7 @@ export class TicketsController {
 
   @Post()
   @Roles(Role.ADMIN)
-  create(
-    @Body() dto: CreateTicketDto,
-    @CurrentUser() user: { id: string; role: Role },
-  ) {
+  create(@Body() dto: CreateTicketDto, @CurrentUser() user: { id: string; role: Role }) {
     return this.ticketsService.create(dto, user.id);
   }
 
@@ -68,10 +65,7 @@ export class TicketsController {
 
   @Patch(':id/assign')
   @Roles(Role.ADMIN)
-  assign(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: AssignTicketDto,
-  ) {
+  assign(@Param('id', ParseUUIDPipe) id: string, @Body() dto: AssignTicketDto) {
     return this.ticketsService.assign(id, dto);
   }
 

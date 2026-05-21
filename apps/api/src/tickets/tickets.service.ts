@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { TicketStatus, Role } from '@prisma/client';
+import { TicketStatus, Role, Priority } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
@@ -30,15 +30,11 @@ const ticketSelect = {
 export class TicketsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(filters: {
-    status?: TicketStatus;
-    priority?: string;
-    assignedToId?: string;
-  }) {
+  async findAll(filters: { status?: TicketStatus; priority?: Priority; assignedToId?: string }) {
     return this.prisma.ticket.findMany({
       where: {
         ...(filters.status && { status: filters.status }),
-        ...(filters.priority && { priority: filters.priority as any }),
+        ...(filters.priority && { priority: filters.priority }),
         ...(filters.assignedToId && { assignedToId: filters.assignedToId }),
       },
       select: ticketSelect,
@@ -79,11 +75,7 @@ export class TicketsService {
     });
   }
 
-  async updateStatus(
-    id: string,
-    dto: UpdateStatusDto,
-    currentUser: { id: string; role: Role },
-  ) {
+  async updateStatus(id: string, dto: UpdateStatusDto, currentUser: { id: string; role: Role }) {
     const ticket = await this.prisma.ticket.findUnique({ where: { id } });
     if (!ticket) throw new NotFoundException(`Ticket ${id} introuvable`);
 
@@ -139,8 +131,7 @@ export class TicketsService {
     const LIMIT_MS = 48 * 60 * 60 * 1000;
 
     const lateTickets = tickets.filter((t) => {
-      const isActive =
-        t.status === TicketStatus.OPEN || t.status === TicketStatus.IN_PROGRESS;
+      const isActive = t.status === TicketStatus.OPEN || t.status === TicketStatus.IN_PROGRESS;
       const age = now.getTime() - new Date(t.createdAt).getTime();
       return isActive && age > LIMIT_MS;
     });

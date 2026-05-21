@@ -31,10 +31,7 @@ export class CommentsController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(
-    @Param('id', ParseUUIDPipe) id: string,
-    @CurrentUser() user: { id: string; role: Role },
-  ) {
+  remove(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: { id: string; role: Role }) {
     return this.commentsService.remove(id, user);
   }
 }
