@@ -18,7 +18,7 @@
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
-    "db:seed": "ts-node -r tsconfig-paths/register prisma/seed.ts",
+    "db:seed": "ts-node -r tsconfig-paths/register src/database/seed.ts",
     "db:reset": "prisma migrate reset --force"
   },
   "dependencies": {
