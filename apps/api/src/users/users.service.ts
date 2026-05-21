@@ -33,6 +33,13 @@ export class UsersService {
     return this.prisma.user.findMany({ select: userPublicSelect });
   }
 
+  async findTechnicians() {
+    return this.prisma.user.findMany({
+      where: { role: 'TECHNICIAN' },
+      select: userPublicSelect,
+    });
+  }
+
   async findOne(id: string) {
     const user = await this.prisma.user.findUnique({
       where: { id },

@@ -17,7 +17,7 @@ export class UsersController {
 
   @Get('technicians')
   findTechnicians() {
-    return this.usersService.findAll();
+    return this.usersService.findTechnicians();
   }
 
   @Get(':id')
